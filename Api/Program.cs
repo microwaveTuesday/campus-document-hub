@@ -144,6 +144,16 @@ app.MapGet("/api/files/{id:guid}", (Guid id, HttpContext c) =>
     if (!File.Exists(path)) return Results.Json(new { error = "The stored file is unavailable." }, statusCode: 503);
     return Results.File(path, record.ContentType, record.OriginalName, enableRangeProcessing: false);
 }).RequireAuthorization();
+app.MapGet("/api/reports/documents", (string? from, string? to, HttpContext c) =>
+{
+    var today = DateOnly.FromDateTime(DateTime.UtcNow);
+    var start = today.AddDays(-29); var end = today;
+    if ((from != null && !DateOnly.TryParseExact(from, "yyyy-MM-dd", out start)) ||
+        (to != null && !DateOnly.TryParseExact(to, "yyyy-MM-dd", out end)) ||
+        start > end || end.DayNumber - start.DayNumber > 365 || end == DateOnly.MaxValue)
+        return Results.BadRequest(new { error = "Use valid YYYY-MM-DD dates, ordered from oldest to newest, covering at most 366 days." });
+    return Results.Ok(store.Report(c.User.FindFirstValue(ClaimTypes.NameIdentifier)!, start, end));
+}).RequireAuthorization();
 app.Run();
 static IResult Error(string message) => Results.BadRequest(new { error = message });
 record Login(string? Username, string? Password);
@@ -181,6 +191,21 @@ sealed class DocumentStore(string root)
         catch { if (File.Exists(path)) File.Delete(path); throw; }
     }
     public List<FileRecord> List(string owner) => Query(owner, null);
+    public object Report(string owner, DateOnly from, DateOnly to)
+    {
+        using var c = Open(); using var cmd = c.CreateCommand();
+        cmd.CommandText = "SELECT substr(CreatedAtUtc,1,10), COUNT(*), COALESCE(SUM(SizeBytes),0), SUM(CASE WHEN ContentType='application/pdf' THEN 1 ELSE 0 END), SUM(CASE WHEN ContentType IN ('image/png','image/jpeg') THEN 1 ELSE 0 END) FROM Files WHERE Owner=$owner AND CreatedAtUtc >= $from AND CreatedAtUtc < $until GROUP BY substr(CreatedAtUtc,1,10) ORDER BY 1";
+        cmd.Parameters.AddWithValue("$owner", owner);
+        cmd.Parameters.AddWithValue("$from", from.ToString("yyyy-MM-dd") + "T00:00:00");
+        cmd.Parameters.AddWithValue("$until", to.AddDays(1).ToString("yyyy-MM-dd") + "T00:00:00");
+        var days = new Dictionary<string, long>(); long total = 0, bytes = 0, pdf = 0, images = 0;
+        using (var reader = cmd.ExecuteReader())
+            while (reader.Read()) { days[reader.GetString(0)] = reader.GetInt64(1); total += reader.GetInt64(1); bytes += reader.GetInt64(2); pdf += reader.GetInt64(3); images += reader.GetInt64(4); }
+        var series = Enumerable.Range(0, to.DayNumber - from.DayNumber + 1).Select(i => {
+            var date = from.AddDays(i).ToString("yyyy-MM-dd"); return new { date, count = days.GetValueOrDefault(date) };
+        }).ToArray();
+        return new { from = from.ToString("yyyy-MM-dd"), to = to.ToString("yyyy-MM-dd"), timeZone = "UTC", generatedAtUtc = DateTimeOffset.UtcNow.ToString("O"), totalDocuments = total, pdfDocuments = pdf, imageDocuments = images, storedBytes = bytes, uploadsByDay = series };
+    }
     public FileRecord? Find(string id, string owner) => Query(owner, id).SingleOrDefault();
     List<FileRecord> Query(string owner, string? id)
     {

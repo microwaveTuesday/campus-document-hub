@@ -79,6 +79,18 @@ if os.environ.get('StorageRoot'):
  blobs=set(db.parent.glob('*.blob'));conn.execute("CREATE TRIGGER TestFailure BEFORE INSERT ON Files BEGIN SELECT RAISE(ABORT, 'test-only metadata failure'); END");conn.commit()
  try:check('Metadata failure returns 503 and cleans bytes',alice.upload('failure.png',PNG),503,'no orphan blob',lambda r:set(db.parent.glob('*.blob'))==blobs)
  finally:conn.execute('DROP TRIGGER TestFailure');conn.commit();conn.close()
+check('Anonymous reporting denied',anon.request('/api/reports/documents'),401)
+check('Other owner report is empty',bob.request('/api/reports/documents'),200,predicate=lambda r:json.loads(r[1])['totalDocuments']==0)
+owned=json.loads(alice.request('/api/files')[1])
+def correct_report(r):
+ report=json.loads(r[1])
+ return (report['totalDocuments']==len(owned) and report['storedBytes']==sum(f['sizeBytes'] for f in owned) and report['pdfDocuments']==sum(f['contentType']=='application/pdf' for f in owned) and report['imageDocuments']==sum(f['contentType'].startswith('image/') for f in owned) and sum(d['count'] for d in report['uploadsByDay'])==len(owned) and len(report['uploadsByDay'])==30 and 'owner' not in report and 'originalName' not in str(report))
+check('Report aggregates reconcile to owner records',alice.request('/api/reports/documents'),200,predicate=correct_report)
+today=datetime.datetime.now(datetime.timezone.utc).date().isoformat()
+check('Inclusive final day includes uploads',alice.request('/api/reports/documents?from='+today+'&to='+today),200,predicate=lambda r:json.loads(r[1])['totalDocuments']==len(owned))
+check('Empty range returns zero and zero-filled days',alice.request('/api/reports/documents?from=2000-01-01&to=2000-01-03'),200,predicate=lambda r:json.loads(r[1])['totalDocuments']==0 and len(json.loads(r[1])['uploadsByDay'])==3)
+for query in ['from=oops','from=2026-02-30','from=2026-10-02&to=2026-10-01','from=2000-01-01&to=2026-10-01','to=9999-12-31']:
+ check('Invalid reporting range '+query,alice.request('/api/reports/documents?'+query),400)
 check('Logout succeeds',alice.request('/api/logout','POST'),204)
 check('Signed-out retrieval denied',alice.request('/api/files/'+fid),401)
 check('Private storage has no static route',anon.request('/private/'+fid+'.blob'),404)

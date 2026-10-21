@@ -1,6 +1,6 @@
 # Browser verification
 
-Executed: 10/21/2026, 12:29:15 PM (Asia/Manila)
+Executed: 10/21/2026, 3:03:25 PM (Asia/Manila)
 
 Real Microsoft Edge browser, automated using Playwright. Desktop: 1440 × 1080; mobile viewport: 390 × 844.
 
@@ -16,6 +16,9 @@ Real Microsoft Edge browser, automated using Playwright. Desktop: 1440 × 1080; 
 | Valid JPEG content accepted for jpg and jpeg extensions | PASS |
 | 390px mobile layout has no horizontal overflow | PASS |
 | Different signed-in browser account denied known Bob ID | PASS |
+| Report ready totals match real API and daily table | PASS |
+| Report empty state from real date filter | PASS |
+| Report loading, error and retry states | PASS |
 | Sign out returns to login and prevents retrieval | PASS |
 | No uncaught browser JavaScript errors | PASS |
 

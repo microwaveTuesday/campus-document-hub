@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import Dashboard from "./Dashboard.jsx";
 import { createRoot } from "react-dom/client";
 import "./style.css";
 const size = (n) =>
@@ -8,6 +9,7 @@ const size = (n) =>
       ? `${(n / 1000).toFixed(1)} KB`
       : `${(n / 1_000_000).toFixed(2)} MB`;
 function App() {
+  const [reportRevision, setReportRevision] = useState(0);
   const [user, setUser] = useState(null),
     [ready, setReady] = useState(false),
     [files, setFiles] = useState([]),
@@ -16,6 +18,7 @@ function App() {
     [message, setMessage] = useState(null);
   const picker = useRef(null),
     csrf = useRef("");
+  const expireSession = useCallback(() => { setUser(null); setFiles([]); setMessage({ ok: false, text: "Your session expired. Sign in again." }); }, []);
   async function token() {
     const r = await fetch("/api/csrf");
     if (!r.ok) throw Error("Cannot connect to the server.");
@@ -49,6 +52,7 @@ function App() {
   }
   async function refresh() {
     setFiles(await request("/api/files"));
+    setReportRevision(n => n + 1);
   }
   useEffect(() => {
     (async () => {
@@ -154,7 +158,7 @@ function App() {
           </span>
         </a>
         <div className="header-end">
-          <span className="course">INTEGRATIVE PROGRAMMING 1 · WEEK 10</span>
+          <span className="course">INTEGRATIVE PROGRAMMING 1 · WEEK 11</span>
           {user && (
             <>
               <span className="account">{user}</span>
@@ -227,7 +231,7 @@ function App() {
             </form>
           </section>
         ) : (
-          <div className="workspace">
+          <><Dashboard key={user} revision={reportRevision} onExpired={expireSession}/><div className="workspace">
             <section className="upload-panel">
               <div className="section-top">
                 <span className="step">01 / UPLOAD</span>
@@ -330,11 +334,11 @@ function App() {
                 </ul>
               )}
             </section>
-          </div>
+          </div></>
         )}
         <footer>
           <span>CAMPUS DOCUMENT HUB</span>
-          <span>Week 10 · File management & document processing</span>
+          <span>Week 11 · Document reporting dashboard</span>
         </footer>
       </main>
     </>

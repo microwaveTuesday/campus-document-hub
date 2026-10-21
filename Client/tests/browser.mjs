@@ -67,7 +67,7 @@ try {
     const r = await response;
     expect(r.status()).toBe(201);
     fileId = (await r.json()).id;
-    await expect(page.getByRole("status")).toContainText("Upload complete");
+    await expect(page.locator(".notice.success")).toContainText("Upload complete");
     await expect(page.locator(".file-list")).toContainText("Available");
     await page.screenshot({
       path: path.join(shots, "03-upload-success.png"),
@@ -181,6 +181,44 @@ try {
       await other.close();
     },
   );
+  await run("Report ready totals match real API and daily table", async () => {
+    await page.setViewportSize({ width: 1440, height: 1080 });
+    await expect(page.locator('.kpi')).toHaveCount(4);
+    const report = await (await context.request.get(base + '/api/reports/documents')).json();
+    await expect(page.locator('.kpi').first()).toContainText(report.totalDocuments.toLocaleString());
+    await page.getByText('View exact daily counts').click();
+    await expect(page.locator('.daily-table tbody tr')).toHaveCount(report.uploadsByDay.length);
+    await page.screenshot({ path: path.join(shots, '11-dashboard-ready.png'), fullPage: true });
+  });
+  await run("Report empty state from real date filter", async () => {
+    await page.getByLabel('From (UTC)').fill('2000-01-01');
+    await page.getByLabel('To (UTC)').fill('2000-01-03');
+    await page.getByRole('button', { name: 'Update report' }).click();
+    await expect(page.getByRole('heading', { name: 'No documents in this date range' })).toBeVisible();
+    await page.screenshot({ path: path.join(shots, '12-dashboard-empty.png'), fullPage: true });
+  });
+  await run("Report loading, error and retry states", async () => {
+    let release;
+    const gate = new Promise(resolve => { release = resolve; });
+    await page.route('**/api/reports/documents?*', async route => { await gate; await route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: 'Report unavailable. Try again.' }) }); });
+    await page.getByRole('button', { name: 'Update report' }).click();
+    await expect(page.getByText('Loading document report…')).toBeVisible();
+    await page.screenshot({ path: path.join(shots, '13-dashboard-loading.png'), fullPage: true });
+    release();
+    await expect(page.getByRole('alert')).toContainText('Report unavailable');
+    await page.screenshot({ path: path.join(shots, '14-dashboard-error.png'), fullPage: true });
+    await page.unroute('**/api/reports/documents?*');
+    await page.getByRole('button', { name: 'Retry report' }).click();
+    await expect(page.getByRole('heading', { name: 'No documents in this date range' })).toBeVisible();
+    const today = new Date().toISOString().slice(0,10);
+    await page.getByLabel('From (UTC)').fill(today);
+    await page.getByLabel('To (UTC)').fill(today);
+    await page.getByRole('button', { name: 'Update report' }).click();
+    await expect(page.locator('.kpi')).toHaveCount(4);
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: path.join(shots, '15-dashboard-mobile.png'), fullPage: true });
+  });
   await run("Sign out returns to login and prevents retrieval", async () => {
     await page.getByRole("button", { name: "Sign out" }).click();
     await expect(

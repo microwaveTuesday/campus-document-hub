@@ -34,3 +34,7 @@ git clone CampusDocumentHub.git.bundle ../CampusDocumentHub-review
 ```
 
 The source ZIP intentionally excludes installed dependencies, build outputs, private data, logs, cookies and the `.git` internal directory. The Git bundle preserves the meaningful commit independently of the ZIP source files. No GitHub upload or classroom submission has been made.
+
+## Week 11 update
+
+Follow [the Week 11 submission guide](docs/WEEK11-SUBMISSION.md) for the current dashboard, Git instructions, screenshots and peer review. The preceding Week 10 instructions describe the earlier upload milestone.

@@ -1,6 +1,6 @@
-# Campus Document Hub — Week 10
+# Campus Document Hub — Weeks 10 and 11
 
-A small React + ASP.NET Core upload feature for Integrative Programming and Technologies 1. Implements the Week 10 Lab Activity 1; no Week 11 dashboard is included.
+A React + ASP.NET Core document hub for Integrative Programming and Technologies 1. Week 10 uploads and private retrieval now include a Week 11 API-backed document dashboard. See [metrics and assumptions](docs/METRICS.md), [peer review template](docs/PEER-REVIEW.md), and [VS Code, Git and submission guide](docs/WEEK11-SUBMISSION.md).
 
 ## Start in VS Code (Windows)
 
@@ -37,6 +37,7 @@ If PowerShell cannot find .NET or Node after installing them, restart VS Code. I
 | POST /api/login | Development demo sign-in; JSON username/password; token required |
 | POST /api/logout | End authenticated session; token required |
 | GET /api/files | Only authenticated owner's metadata |
+| GET /api/reports/documents?from=YYYY-MM-DD&to=YYYY-MM-DD | Owner-scoped document counts, bytes and daily aggregates; default latest 30 UTC days |
 | POST /api/files | Exactly one multipart field named `file`; token and authentication required |
 | GET /api/files/{id} | Owner-authorized attachment download; 404 for absent or another owner's ID |
 
@@ -50,4 +51,4 @@ Run `powershell -ExecutionPolicy Bypass -File .\test.ps1` to build, start an iso
 
 ## What to submit
 
-Use the accompanying `CampusDocumentHub-Week10-Submission.zip`. It contains source, lockfiles, run/test scripts, fixtures, README, design notes, recorded tests, screenshots and a portable Git bundle. Installed packages, build outputs, session cookies and uploaded private documents are excluded. Do not upload your private storage folder. See `SUBMISSION.md` for the demonstration sequence and Git evidence.
+For Week 11, follow `docs/WEEK11-SUBMISSION.md` and submit the updated GitHub repository. Any existing Week 10 archive predates the dashboard. Do not upload your private storage folder.
