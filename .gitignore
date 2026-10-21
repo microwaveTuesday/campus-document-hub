@@ -1,0 +1,8 @@
+**/bin/
+**/obj/
+**/node_modules/
+Api/wwwroot/
+artifacts/
+*.user
+.vs/
+**/__pycache__/

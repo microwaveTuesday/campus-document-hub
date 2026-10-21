@@ -1,0 +1,240 @@
+[
+  {
+    "case": "Anonymous upload denied",
+    "expected": "401 ",
+    "actual": "401",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Anonymous library denied",
+    "expected": "401 ",
+    "actual": "401",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Wrong password rejected",
+    "expected": "401 ",
+    "actual": "401 {\"error\": \"Incorrect username or password.\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Alice signs in",
+    "expected": "200 ",
+    "actual": "200 {\"username\": \"alice\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Bob signs in",
+    "expected": "200 ",
+    "actual": "200 {\"username\": \"bob\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Valid PNG accepted",
+    "expected": "201 ",
+    "actual": "201 {\"id\": \"aa3f368f-e327-413c-8ce2-b9c9c5ece4aa\", \"owner\": \"alice\", \"originalName\": \"campus-photo.png\", \"sizeBytes\": 73, \"contentType\": \"image/png\", \"status\": \"Available\", \"createdAtUtc\": \"2026-10-21T04:29:08.0972126+00:00\", \"sha256\": \"F6CC9DCA62AF499AEB6210D4D7A3881F3B103FA27CF089D621632791D3ED73CE\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Owner download returns original bytes",
+    "expected": "200 identical bytes and attachment",
+    "actual": "200",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Other owner cannot retrieve known ID",
+    "expected": "404 ",
+    "actual": "404",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Anonymous cannot retrieve known ID",
+    "expected": "401 ",
+    "actual": "401",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Library contains only owner metadata",
+    "expected": "200 empty list",
+    "actual": "200",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Valid PDF accepted",
+    "expected": "201 ",
+    "actual": "201 {\"id\": \"021aa64d-98b7-40a0-9132-fb2967575e32\", \"owner\": \"alice\", \"originalName\": \"campus-notes.pdf\", \"sizeBytes\": 431, \"contentType\": \"application/pdf\", \"status\": \"Available\", \"createdAtUtc\": \"2026-10-21T04:29:09.5761722+00:00\", \"sha256\": \"DE9E3B3ECEA164C90BA5E1F5FE74AF451ABAB19ADDEE9B8540996CC6DCCF9478\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Zero byte PDF rejected",
+    "expected": "400 ",
+    "actual": "400 {\"error\": \"Choose a non-empty file.\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Oversized file rejected",
+    "expected": "400 ",
+    "actual": "400 {\"error\": \"File exceeds the 5 MB (5,000,000 byte) limit.\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Request body ceiling enforced before reading body",
+    "expected": "413 ",
+    "actual": "413 {\"error\": \"Request exceeds the 5 MB file limit plus form overhead.\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Unsupported extension rejected",
+    "expected": "400 ",
+    "actual": "400 {\"error\": \"Unsupported file type. Choose a PDF, PNG, or JPEG.\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Double extension rejected",
+    "expected": "400 ",
+    "actual": "400 {\"error\": \"Unsupported file type. Choose a PDF, PNG, or JPEG.\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Text disguised as PNG rejected",
+    "expected": "400 ",
+    "actual": "400 {\"error\": \"Image content is invalid or corrupt.\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "PNG signature with corrupt payload rejected",
+    "expected": "400 ",
+    "actual": "400 {\"error\": \"Image content is invalid or corrupt.\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Invalid PDF rejected",
+    "expected": "400 ",
+    "actual": "400 {\"error\": \"File content is invalid, corrupt, encrypted, or does not match the chosen type.\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Declared MIME mismatch rejected",
+    "expected": "400 ",
+    "actual": "400 {\"error\": \"The file's declared type does not match its extension.\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Extension/content mismatch rejected",
+    "expected": "400 ",
+    "actual": "400 {\"error\": \"Image content does not match its extension.\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Extreme image dimensions rejected",
+    "expected": "400 ",
+    "actual": "400 {\"error\": \"Image exceeds the 8,000 pixel / 20 megapixel limit.\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Wrong multipart field rejected",
+    "expected": "400 ",
+    "actual": "400 {\"error\": \"Choose a non-empty file.\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Duplicate display name uses new ID",
+    "expected": "201 new generated ID",
+    "actual": "201 {\"id\": \"c2283104-28ba-425e-8500-ad371944131f\", \"owner\": \"alice\", \"originalName\": \"campus-photo.png\", \"sizeBytes\": 73, \"contentType\": \"image/png\", \"status\": \"Available\", \"createdAtUtc\": \"2026-10-21T04:29:10.1895414+00:00\", \"sha256\": \"F6CC9DCA62AF499AEB6210D4D7A3881F3B103FA27CF089D621632791D3ED73CE\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Path in supplied name reduced to basename",
+    "expected": "201 display name outside.png",
+    "actual": "201 {\"id\": \"a6a64a42-403d-4593-91a2-bf30bd5297a3\", \"owner\": \"alice\", \"originalName\": \"outside.png\", \"sizeBytes\": 73, \"contentType\": \"image/png\", \"status\": \"Available\", \"createdAtUtc\": \"2026-10-21T04:29:10.2332916+00:00\", \"sha256\": \"F6CC9DCA62AF499AEB6210D4D7A3881F3B103FA27CF089D621632791D3ED73CE\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Long filename rejected",
+    "expected": "400 ",
+    "actual": "400 {\"error\": \"Use a filename of 1\\u2013180 characters without control characters.\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Nonexistent file returns 404",
+    "expected": "404 ",
+    "actual": "404",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Missing CSRF upload token rejected",
+    "expected": "400 ",
+    "actual": "400 {\"error\": \"Session security token expired. Refresh and try again.\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Rejected upload leaves metadata unchanged",
+    "expected": "200 ",
+    "actual": "200",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Valid PDF exactly at 5 MB accepted",
+    "expected": "201 ",
+    "actual": "201 {\"id\": \"3da758a9-23b6-4377-87a5-5beeb54bf971\", \"owner\": \"alice\", \"originalName\": \"at-limit.pdf\", \"sizeBytes\": 5000000, \"contentType\": \"application/pdf\", \"status\": \"Available\", \"createdAtUtc\": \"2026-10-21T04:29:10.7555493+00:00\", \"sha256\": \"BD3FDA7F413145C3EE21176790B84BF02C5573F3DDC931C89F1CA4212BAAF912\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Metadata failure returns 503 and cleans bytes",
+    "expected": "503 no orphan blob",
+    "actual": "503 {\"error\": \"Storage is temporarily unavailable. Please try again.\"}",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Logout succeeds",
+    "expected": "204 ",
+    "actual": "204",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Signed-out retrieval denied",
+    "expected": "401 ",
+    "actual": "401",
+    "passed": true,
+    "defect": "\u2014"
+  },
+  {
+    "case": "Private storage has no static route",
+    "expected": "404 ",
+    "actual": "404",
+    "passed": true,
+    "defect": "\u2014"
+  }
+]
